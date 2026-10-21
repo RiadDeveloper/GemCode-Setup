@@ -28,14 +28,19 @@ if (-not (Test-Path $ClaudeDir)) {
 Stop-Process -Name "gemcode" -ErrorAction SilentlyContinue
 
 # 3. Retrieve Native Binary
-$LocalBinary = "$PSScriptRoot\bin\gemcode-windows-amd64.exe"
-$DownloadUrl = "https://raw.githubusercontent.com/RiadDeveloper/GemCode-Setup/main/bin/gemcode-windows-amd64.exe"
+$Version = "2.0.0"
+if (Test-Path "$PSScriptRoot\VERSION") {
+    $Version = (Get-Content "$PSScriptRoot\VERSION" -Raw).Trim()
+}
 
-if (Test-Path $LocalBinary) {
-    Copy-Item -Path $LocalBinary -Destination $ExePath -Force
-    Write-Host "[√] Deployed local GemCode engine" -ForegroundColor Green
+$LocalBinary = Get-ChildItem "$PSScriptRoot\bin\gemcode-windows-amd64-*.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
+$DownloadUrl = "https://raw.githubusercontent.com/RiadDeveloper/GemCode-Setup/main/bin/gemcode-windows-amd64-v$Version.exe"
+
+if ($LocalBinary -and (Test-Path $LocalBinary.FullName)) {
+    Copy-Item -Path $LocalBinary.FullName -Destination $ExePath -Force
+    Write-Host "[√] Deployed local GemCode engine ($($LocalBinary.Name))" -ForegroundColor Green
 } else {
-    Write-Host "[*] Downloading GemCode native engine..." -ForegroundColor Yellow
+    Write-Host "[*] Downloading GemCode native engine v$Version..." -ForegroundColor Yellow
     Invoke-WebRequest -Uri $DownloadUrl -OutFile $ExePath -UseBasicParsing
     Write-Host "[√] Downloaded and installed GemCode engine" -ForegroundColor Green
 }

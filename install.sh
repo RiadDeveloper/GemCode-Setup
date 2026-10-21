@@ -20,28 +20,33 @@ SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 mkdir -p "$INSTALL_DIR"
 mkdir -p "$CLAUDE_DIR"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERSION="2.0.0"
+if [ -f "$SCRIPT_DIR/VERSION" ]; then
+    VERSION="$(cat "$SCRIPT_DIR/VERSION" | tr -d '[:space:]')"
+fi
+
 # 1. Determine platform binary
 BIN_NAME=""
 if [ "$OS" = "Darwin" ]; then
     if [ "$ARCH" = "arm64" ]; then
-        BIN_NAME="gemcode-darwin-arm64"
+        BIN_NAME="gemcode-darwin-arm64-v$VERSION"
     else
-        BIN_NAME="gemcode-darwin-amd64"
+        BIN_NAME="gemcode-darwin-amd64-v$VERSION"
     fi
 elif [ "$OS" = "Linux" ]; then
-    BIN_NAME="gemcode-linux-amd64"
+    BIN_NAME="gemcode-linux-amd64-v$VERSION"
 else
     echo "[!] Unsupported OS: $OS"
     exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_BIN="$SCRIPT_DIR/bin/$BIN_NAME"
 DOWNLOAD_URL="https://raw.githubusercontent.com/RiadDeveloper/GemCode-Setup/main/bin/$BIN_NAME"
 
 if [ -f "$LOCAL_BIN" ]; then
     cp "$LOCAL_BIN" "$BIN_PATH"
-    echo "[√] Deployed local GemCode binary"
+    echo "[√] Deployed local GemCode binary ($BIN_NAME)"
 else
     echo "[*] Downloading $BIN_NAME..."
     curl -fsSL "$DOWNLOAD_URL" -o "$BIN_PATH"
