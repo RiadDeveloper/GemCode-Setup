@@ -46,9 +46,15 @@ if ($LocalBinary -and (Test-Path $LocalBinary.FullName)) {
 }
 
 # 4. Configure Windows Auto-Start on Boot (Silent Background Service)
+$VbsPath = "$InstallDir\run-hidden.vbs"
+Set-Content -Path $VbsPath -Value 'CreateObject("Wscript.Shell").Run """" & WScript.Arguments(0) & """", 0, False' -Encoding ASCII
 $RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-Set-ItemProperty -Path $RegPath -Name "GemCodeEngine" -Value "`"$ExePath`""
+Set-ItemProperty -Path $RegPath -Name "GemCodeEngine" -Value "wscript.exe `"$VbsPath`" `"$ExePath`""
 Write-Host "[√] Configured Windows Auto-Start on Boot (Runs invisibly in background)" -ForegroundColor Green
+
+# 5. Start the engine right now silently
+Start-Process -FilePath "wscript.exe" -ArgumentList "`"$VbsPath`" `"$ExePath`""
+Write-Host "[√] GemCode background engine is actively running on http://localhost:8081" -ForegroundColor Green
 
 # 5. Configure ~/.claude/settings.json
 $ClaudeSettings = @{
