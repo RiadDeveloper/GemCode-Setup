@@ -28,12 +28,22 @@ if (-not (Test-Path $ClaudeDir)) {
 Stop-Process -Name "gemcode" -ErrorAction SilentlyContinue
 
 # 3. Retrieve Native Binary
-$Version = "2.0.0"
-if (Test-Path "$PSScriptRoot\VERSION") {
+$Version = "2.3.0"
+if ($PSScriptRoot -and (Test-Path "$PSScriptRoot\VERSION")) {
     $Version = (Get-Content "$PSScriptRoot\VERSION" -Raw).Trim()
+} else {
+    try {
+        $OnlineVer = (Invoke-RestMethod -Uri "https://raw.githubusercontent.com/RiadDeveloper/GemCode-Setup/main/VERSION" -UseBasicParsing).Trim()
+        if ($OnlineVer) { $Version = $OnlineVer }
+    } catch {
+        $Version = "2.3.0"
+    }
 }
 
-$LocalBinary = Get-ChildItem "$PSScriptRoot\bin\gemcode-windows-amd64-*.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
+$LocalBinary = $null
+if ($PSScriptRoot -and (Test-Path "$PSScriptRoot\bin")) {
+    $LocalBinary = Get-ChildItem "$PSScriptRoot\bin\gemcode-windows-amd64-*.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
+}
 $DownloadUrl = "https://raw.githubusercontent.com/RiadDeveloper/GemCode-Setup/main/bin/gemcode-windows-amd64-v$Version.exe"
 
 if ($LocalBinary -and (Test-Path $LocalBinary.FullName)) {

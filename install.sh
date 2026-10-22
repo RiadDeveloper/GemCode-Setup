@@ -20,10 +20,15 @@ SETTINGS_PATH="$CLAUDE_DIR/settings.json"
 mkdir -p "$INSTALL_DIR"
 mkdir -p "$CLAUDE_DIR"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VERSION="2.0.0"
-if [ -f "$SCRIPT_DIR/VERSION" ]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
+VERSION="2.3.0"
+if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/VERSION" ]; then
     VERSION="$(cat "$SCRIPT_DIR/VERSION" | tr -d '[:space:]')"
+else
+    ONLINE_VER="$(curl -fsSL https://raw.githubusercontent.com/RiadDeveloper/GemCode-Setup/main/VERSION 2>/dev/null | tr -d '[:space:]' || true)"
+    if [ -n "$ONLINE_VER" ]; then
+        VERSION="$ONLINE_VER"
+    fi
 fi
 
 # 1. Determine platform binary
